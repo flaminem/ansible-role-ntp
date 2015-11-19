@@ -1,0 +1,40 @@
+# ntp - Network Time Protoco client and server
+#
+# The Network Time Protocol client and server synchronizes
+# system clocks over the network
+
+description "NTP server"
+
+start on runlevel [2345]
+stop on runlevel [!2345]
+
+respawn
+respawn limit 10 5
+umask 022
+
+pre-start script
+    test -x /usr/sbin/ntpd || { stop; exit 0; }
+    test -f /etc/ntp.conf || { stop; exit 0; }
+
+    mkdir -p -m0755 /var/run/ntp
+
+end script
+
+script
+    if [ -r /etc/default/ntp ]; then
+        . /etc/default/ntp
+    fi
+
+    if [ -e /var/lib/ntp/ntp.conf.dhcp ]; then
+        NTPD_OPTS="$NTPD_OPTS -c /var/lib/ntp/ntp.conf.dhcp"
+    fi
+
+    RUNASUSER=ntp
+    UGID=$(getent passwd $RUNASUSER | cut -f 3,4 -d:) || true
+    if test "$(uname -s)" = "Linux"; then
+        NTPD_OPTS="$NTPD_OPTS -u $UGID"
+    fi
+
+    exec /usr/sbin/ntpd -n -p /var/run/ntpd.pid $NTPD_OPTS
+end script
+
