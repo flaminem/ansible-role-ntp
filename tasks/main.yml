@@ -23,6 +23,10 @@
   tags: ["packages","ntp"]
 # ntpdate is not nedeed. by default in debian system, ntpd is launch with -g option (that do exactly ntpdate).
 
+- name: Copy the Upstart ntpd.conf template file
+  template: src=upstart_ntpd.conf.j2 dest=/etc/init/ntp.conf
+  tags: ["Configuration","ntp"]
+
 - name: Copy the ntp.conf template file
   template: src=ntp.conf.j2 dest=/etc/ntp.conf
   notify: 
