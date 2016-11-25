@@ -5,13 +5,15 @@
 
 - name: Install the required packages in Redhat derivatives
   yum: name={{ item }} state={{ npt_pkg_state }}
-  with_items: ntp_pkgs
+  with_items:
+    - "{{ ntp_pkgs }}"
   when: ansible_os_family == 'RedHat'
   tags: ["packages","ntp"]
 
 - name: Install the required packages in Debian derivatives
   apt: name={{ item }} state={{ npt_pkg_state }} update_cache=yes
-  with_items: ntp_pkgs
+  with_items:
+    - "{{ ntp_pkgs }}"
   when: ansible_os_family == 'Debian'
   tags: ["packages","ntp"]
 
