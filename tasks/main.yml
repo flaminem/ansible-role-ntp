@@ -3,29 +3,16 @@
   include_vars: "{{ ansible_os_family }}.yml"
   tags: ["configuration","packages","service","ntp"]
 
-- name: Install the required packages in Redhat derivatives
-  yum: name={{ item }} state={{ npt_pkg_state }}
+- name: Install the required packages in {{ ansible_os_family }} derivatives
+  package: name={{ item }} state={{ npt_pkg_state }}
   with_items:
     - "{{ ntp_pkgs }}"
-  when: ansible_os_family == 'RedHat'
   tags: ["packages","ntp"]
-
-- name: Install the required packages in Debian derivatives
-  apt: name={{ item }} state={{ npt_pkg_state }} update_cache=yes
-  with_items:
-    - "{{ ntp_pkgs }}"
-  when: ansible_os_family == 'Debian'
-  tags: ["packages","ntp"]
-
-- name: Remove ntpdate in Debian derivatives
-  apt: name=ntpdate state=absent
-  when: ansible_os_family == 'Debian'
-  tags: ["packages","ntp"]
-# ntpdate is not nedeed. by default in debian system, ntpd is launch with -g option (that do exactly ntpdate).
 
 - name: Copy the Upstart ntpd.conf template file
   template: src=upstart_ntpd.conf.j2 dest=/etc/init/ntp.conf
   tags: ["Configuration","ntp"]
+  when: ansible_service_mgr == "upstart"
 
 - name: Copy the ntp.conf template file
   template: src=ntp.conf.j2 dest=/etc/ntp.conf
